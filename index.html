@@ -271,7 +271,7 @@ td .bs{font-size:13.5px!important}
 <script>
 var COLORS=["--blue","--teal","--amber","--pink","--slate"];
 var DEFAULT={
-  title:"Cinema Sessions - SQUEEKY CLEAN EDITION",
+  title:"Cinema Sessions - SQUEEK E-CLEAN EDITION",
   subtitle:"Profit share on upfront sync and master license fees.",
   note:"",
   upfront:20000,residuals:0,writers:5,maxWriters:8,
@@ -366,7 +366,7 @@ function explain(d){
   var even=nets.length===2&&Math.abs(nets[0].r.upfront-50)<0.001;
   out.push({st:"Step "+(n++)+": Net Profit Pool",sh:pp(100-topPct),who:"Remaining Balance",ds:"The \"net profit share\" left over after the project management fee is deducted"+(even?", split evenly down the middle (50/50).":", split as shown below.")});
   nets.forEach(function(x){var w=x.r.split,m=x.r.id==="studio";
-    out.push({st:"Step "+(n++)+": "+(w?"Writers' Share":m?"Masters' Share":x.r.name+" Share"),sh:pp(x.r.upfront)+" of Net",who:w?"Contributing Talent (Writers)":m?"The Studio (Squeeky Clean - Exclusive sole signatory, admin rights)":x.r.name,ds:w?"Split equally among all music and lyric creators as the publishing/writer's share.":m?"Retained by the studio or rights holder for the master recording.":(x.r.basis||"")})});
+    out.push({st:"Step "+(n++)+": "+(w?"Writers' Share":m?"Masters' Share":x.r.name+" Share"),sh:pp(x.r.upfront)+" of Net",who:w?"Contributing Talent (Writers)":m?"The Studio (SQUEEK E-CLEAN - Exclusive sole signatory, admin rights)":x.r.name,ds:w?"Split equally among all music and lyric creators as the publishing/writer's share.":m?"Retained by the studio or rights holder for the master recording.":(x.r.basis||"")})});
   return out;
 }
 $("copyBtn").addEventListener("click",function(){
