@@ -274,7 +274,7 @@ function render(){
   function tile(x,sub){return'<div class="tile"><span class="k"><span class="dot" style="background:'+col(x.i)+'"></span>'+esc(label(x.r))+'</span><span class="v">'+usd0(x.u)+'</span><span class="s">'+sub+'</span></div>'}
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top});
   var pre='<div class="pre"><span>License fee '+usd0(gross)+' per license</span>';tops.forEach(function(x){pre+='<span>Less '+esc(x.r.short||x.r.name)+' fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
-  var tiles=pre+'<div class="tile net hero"><span class="k">Profit share per license</span><span class="v">'+usd0(d.net)+'</span><span class="s">After agent fees, split below</span></div>';
+  var tiles=pre+'<div class="tile net hero"><span class="k">Profit share per license</span><span class="v">'+usd0(d.net)+'</span><span class="s">After Project Management fee, split below</span></div>';
   tiles+='<div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront).replace('.0%','%')+' of profit share')});tiles+='</div>';
   $("tiles").innerHTML=tiles;pie(d);
   $("how").innerHTML=explain(d).map(function(x){return"<li><b>"+esc(x.h)+"</b><span>"+esc(x.t)+"</span></li>"}).join("");
@@ -303,7 +303,7 @@ var tt;function toast(m){$("toast").textContent=m;$("toast").classList.add("on")
 function explain(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"};
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top}),out=[];
-  out.push({h:"Agent fees come off the top",t:usd0(d.up)+" per license, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+(x.r.short||x.r.name)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share per license."});
+  out.push({h:"Project Management fee comes off the top",t:usd0(d.up)+" per license, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+(x.r.short||x.r.name)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share per license."});
   nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:usd0(x.u)+(x.r.split?", split equally among "+d.w+" writer"+(d.w===1?"":"s")+" ("+usd0(x.u/d.w)+" each)."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):".")})});
   return out;
 }
