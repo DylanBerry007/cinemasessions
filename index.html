@@ -287,14 +287,16 @@ function donut(id,slices,label){
   $(id).innerHTML=s;
 }
 function pie(d){
-  var a0=-Math.PI/2,svg="",items=d.rows.filter(function(x){return!x.r.top}).map(function(x){return{n:x.r.name,c:col(x.i),v:x.r.upfront,a:x.u}}).filter(function(x){return x.v>0});
+  var pp=function(v){return (Math.round(v*100)/100)+"%"},topPct=0;d.rows.forEach(function(x){if(x.r.top)topPct+=x.r.upfront});
+  var a0=-Math.PI/2,svg="",items=d.rows.map(function(x){var g=x.r.top?x.r.upfront:(100-topPct)*x.r.upfront/100;return{n:x.r.name,c:col(x.i),v:g,lab:x.r.top?pp(x.r.upfront):pp(x.r.upfront)+" net",leg:x.r.top?pp(x.r.upfront)+" off the top":pp(x.r.upfront)+" of net"}}).filter(function(x){return x.v>0});
+  items.sort(function(a,b){return (b.leg.indexOf("top")>-1)-(a.leg.indexOf("top")>-1)});
   if(items.length===1)svg='<circle cx="60" cy="60" r="56" fill="'+items[0].c+'"/>';
   else items.forEach(function(x){var a1=a0+x.v/100*2*Math.PI,lg=(a1-a0)>Math.PI?1:0;
     svg+='<path d="M60 60L'+(60+56*Math.cos(a0)).toFixed(2)+' '+(60+56*Math.sin(a0)).toFixed(2)+'A56 56 0 '+lg+' 1 '+(60+56*Math.cos(a1)).toFixed(2)+' '+(60+56*Math.sin(a1)).toFixed(2)+'Z" fill="'+x.c+'" stroke="var(--bg)" stroke-width="1.5"/>';
-    var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+32*Math.cos(m)).toFixed(1)+'" y="'+(60+32*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="600" style="fill:#fff">'+Math.round(x.v)+'%</text>';a0=a1});
+    var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+33*Math.cos(m)).toFixed(1)+'" y="'+(60+33*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="600" style="fill:#fff">'+esc(x.lab)+'</text>';a0=a1});
   if(!items.length)svg='<circle cx="60" cy="60" r="56" fill="var(--soft)"/>';
   $("pie").innerHTML=svg;$("pieLab").textContent="Profit share per license";
-  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+(Math.round(x.v*100)/100)+'%</span></div>'}).join("");
+  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+esc(x.leg)+'</span></div>'}).join("");
 }
 function legend(id,slices){
   $(id).innerHTML=slices.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+pct(x.v)+'<small>'+usd(x.a)+'</small></span></div>'}).join("");
