@@ -214,14 +214,14 @@ td .bs{color:var(--muted);font-size:12px}
 <script>
 var COLORS=["--blue","--teal","--amber","--pink","--slate"];
 var DEFAULT={
-  title:"Cinema Sessions",
+  title:"Cinema Sessions - SQUEEKY CLEAN EDITION",
   subtitle:"Profit share on upfront sync and master license fees.",
-  note:"Dylan Berry only takes part in the Talent pool (writers' and publishing shares) on tracks where he is a contributing songwriter.",
+  note:"",
   upfront:20000,residuals:0,writers:5,maxWriters:8,
   roles:[
     {id:"talent",name:"Talent (Contributors)",short:"Talent",upfront:50,pro:100,split:true,basis:"Publishing side: 50% of net, split equally among contributing writers. Writers also keep 100% of PRO residuals."},
     {id:"studio",name:"Studio (Masters)",short:"Studio",upfront:50,pro:0,split:false,basis:"Owns 100% of the masters: 50% of net. No PRO residuals."},
-    {id:"pm",name:"Project Manager",short:"PM",upfront:20,pro:0,split:false,top:true,basis:"20% of gross off the top as an agent fee, before anyone else is paid."}
+    {id:"pm",name:"SmashHaus Project Manager",short:"SmashHaus Project Manager",upfront:20,pro:0,split:false,top:true,basis:"20% of gross off the top as the SmashHaus Project Manager fee, before anyone else is paid."}
   ]};
 var model=JSON.parse(JSON.stringify(DEFAULT)), draft=null, db=null, isOwner=false, touched=false;
 var $=function(id){return document.getElementById(id)};
@@ -273,7 +273,7 @@ function render(){
   var gross=d.up;
   function tile(x,sub){return'<div class="tile"><span class="k"><span class="dot" style="background:'+col(x.i)+'"></span>'+esc(label(x.r))+'</span><span class="v">'+usd0(x.u)+'</span><span class="s">'+sub+'</span></div>'}
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top});
-  var pre='<div class="pre"><span>License fee '+usd0(gross)+' per license</span>';tops.forEach(function(x){pre+='<span>Less '+esc(label(x.r))+' agent fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
+  var pre='<div class="pre"><span>License fee '+usd0(gross)+' per license</span>';tops.forEach(function(x){pre+='<span>Less '+esc(x.r.short||x.r.name)+' fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
   var tiles=pre+'<div class="tile net hero"><span class="k">Profit share per license</span><span class="v">'+usd0(d.net)+'</span><span class="s">After agent fees, split below</span></div>';
   tiles+='<div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront).replace('.0%','%')+' of profit share')});tiles+='</div>';
   $("tiles").innerHTML=tiles;pie(d);
@@ -303,7 +303,7 @@ var tt;function toast(m){$("toast").textContent=m;$("toast").classList.add("on")
 function explain(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"};
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top}),out=[];
-  out.push({h:"Agent fees come off the top",t:usd0(d.up)+" per license, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+label(x.r)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share per license."});
+  out.push({h:"Agent fees come off the top",t:usd0(d.up)+" per license, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+(x.r.short||x.r.name)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share per license."});
   nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:usd0(x.u)+(x.r.split?", split equally among "+d.w+" writer"+(d.w===1?"":"s")+" ("+usd0(x.u/d.w)+" each)."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):".")})});
   return out;
 }
