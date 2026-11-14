@@ -37,6 +37,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px soli
 button.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 button.primary:hover{filter:brightness(1.1)}
 button.ghost{border-color:transparent;color:var(--muted);padding-inline:10px}
+h2.sh,.calc h2.sh{font-family:var(--f-disp);font-weight:400;font-size:clamp(22px,3.2vw,28px);line-height:1.15;text-transform:uppercase;letter-spacing:.01em;color:var(--ink);margin:0 0 4px;padding-left:12px;border-left:5px solid var(--blue)}
 .lab{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
 .rule{background:var(--soft);border-radius:14px;padding:16px 18px;display:grid;gap:6px;align-content:start;min-width:0}
@@ -204,18 +205,18 @@ td .bs{color:var(--muted);font-size:12px}
   </section>
 
   <section class="how" aria-label="How the profit share works">
-    <span class="lab">How the profit share works</span>
+    <h2 class="sh">How the profit share works</h2>
     <ol id="how"></ol>
     <p class="note">Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.</p>
   </section>
 
   <section class="pie-wrap" aria-label="Profit share chart">
-      <span class="lab" id="pieLab">Profit share</span>
+      <h2 class="sh" id="pieLab">Profit share</h2>
       <div class="cl"><svg id="pie" viewBox="0 0 120 120" role="img" aria-label="Profit share pie chart"></svg><div class="leg" id="pieLeg"></div></div>
   </section>
 
   <section class="calc" aria-label="Profit share">
-    <span class="lab">Example profit share model</span>
+    <h2 class="sh">Example profit share model</h2>
     <div class="inputs">
       <div class="f"><label for="upIn">License fee, PER LICENSE ($)</label><input id="upIn" type="number" min="0" step="500"></div>
       <div class="f"><label for="wrIn">Songwriters on the cue</label><div class="step"><button type="button" id="wrMinus" aria-label="Fewer writers">−</button><input id="wrIn" type="number" min="1" max="8" step="1" inputmode="numeric"><button type="button" id="wrPlus" aria-label="More writers">+</button></div></div>
