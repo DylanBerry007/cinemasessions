@@ -371,7 +371,7 @@ function explain(d){
 }
 $("copyBtn").addEventListener("click",function(){
   var d=calc(),L=[model.title,"The Financial Breakdown (per license)",""];
-  explain(d).forEach(function(x){L.push(x.st,"   Share / Deduction: "+x.sh,"   Who receives it: "+x.who,"   "+x.ds,"")});
+  explain(d).forEach(function(x,i){var st=x.st.replace(/^Step \d+: /,"");L.push((i+1)+". "+st+": "+x.sh+(x.who==="Remaining Balance"?" (split 50/50 below)":" to "+x.who.replace(/ - Exclusive[^)]*/,"")+(/Writers/.test(x.who)?", split equally":"")))});L.push("");
   L.push("Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.");var text=L.join("\n").replace(/\n+$/,"")+"\n",name="cinema-sessions-profit-share.txt";
   var blob=new Blob([text],{type:"text/plain"});
   var anchor=function(){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast("Summary downloaded")};
