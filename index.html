@@ -68,6 +68,9 @@ button.ghost{border-color:transparent;color:var(--muted);padding-inline:10px}
 .f label{font-size:12px;font-weight:600;color:var(--muted)}
 input[type=number],input[type=text],input[type=password],textarea{font:500 15px var(--f-body);color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:100%;font-variant-numeric:tabular-nums}
 textarea{font-size:13px;resize:vertical}
+select{font:500 15px var(--f-body);color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+.wr-row{display:flex;gap:8px;align-items:center}.wr-row input{flex:1}
+.payee{background:var(--soft);border-radius:12px;padding:14px;display:grid;gap:8px}.payee .ph{display:flex;justify-content:space-between;gap:8px;font-weight:600;font-size:14px}.payee .ph span:last-child{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:500}.payee input{background:var(--bg)}
 .sl{display:flex;gap:12px;align-items:center;height:42px}
 .sl input{flex:1;accent-color:var(--blue)}
 .pill{font:600 12px var(--f-mono);background:var(--blue-soft);color:var(--blue);padding:6px 10px;border-radius:999px;white-space:nowrap}
@@ -176,11 +179,34 @@ td .bs{color:var(--muted);font-size:12px}
       <button id="lockBtn" class="ghost" type="button">Sign out</button>
     </div>
   </section>
+  <section class="ed" id="jobs" hidden aria-label="Job report">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <div><span class="lab">Admin</span><h2>Job report</h2></div>
+      <span class="status" id="jbStatus"></span>
+    </div>
+    <div class="row">
+      <div class="f"><label for="jb-saved">Saved jobs</label><select id="jb-saved"><option value="">New job</option></select></div>
+      <div class="f"><label for="jb-name">Job / project name</label><input id="jb-name" type="text" placeholder="e.g. Netflix trailer cue"></div>
+    </div>
+    <div class="row">
+      <div class="f"><label for="jb-date">Date</label><input id="jb-date" type="text" placeholder="e.g. Nov 14, 2026"></div>
+      <div class="f"><label for="jb-fee">License fee, PER LICENSE ($)</label><input id="jb-fee" type="number" min="0" step="500"></div>
+    </div>
+    <div id="jb-payees" style="display:grid;gap:10px"></div>
+    <div class="acts">
+      <button id="jbSave" class="primary" type="button">Save job</button>
+      <button id="jbAll" type="button">Download full report</button>
+      <span id="jbRoleBtns" style="display:contents"></span>
+      <button id="jbDel" class="ghost" type="button">Delete job</button>
+      <button id="jbClose" class="ghost" type="button">Close</button>
+    </div>
+    <p class="err" id="jbErr" role="alert"></p>
+  </section>
 
   <section class="how" aria-label="How the profit share works">
     <span class="lab">How the profit share works</span>
     <ol id="how"></ol>
-    <p class="note">Financial model does not showcase residual income.</p>
+    <p class="note">Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.</p>
   </section>
 
   <section class="pie-wrap" aria-label="Profit share chart">
@@ -310,7 +336,7 @@ function explain(d){
 $("copyBtn").addEventListener("click",function(){
   var d=calc(),L=[model.title+": how the profit share works (per license)",""];
   explain(d).forEach(function(x,i){L.push((i+1)+". "+x.h);if(x.t)L.push("   "+x.t);L.push("")});
-  L.push("Financial model does not showcase residual income.");var text=L.join("\n").replace(/\n+$/,"")+"\n",name="cinema-sessions-profit-share.txt";
+  L.push("Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.");var text=L.join("\n").replace(/\n+$/,"")+"\n",name="cinema-sessions-profit-share.txt";
   var blob=new Blob([text],{type:"text/plain"});
   var anchor=function(){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast("Summary downloaded")};
   (async function(){
@@ -347,10 +373,10 @@ $("roles").addEventListener("click",function(e){var b=e.target.closest("[data-de
 $("addRole").addEventListener("click",function(){if(draft.roles.length>=8)return;draft.roles.push({id:"r"+Date.now().toString(36),name:"New stakeholder",short:"",upfront:0,pro:0,split:false,basis:""});drawRoles()});
 $("resetBtn").addEventListener("click",function(){fillEditor();$("edErr").textContent=""});
 $("closeBtn").addEventListener("click",function(){$("editor").hidden=true});
-$("lockBtn").addEventListener("click",function(){unlocked=false;try{sessionStorage.removeItem("cs-admin")}catch(e){}$("editor").hidden=true});
+$("lockBtn").addEventListener("click",function(){unlocked=false;try{sessionStorage.removeItem("cs-admin")}catch(e){}$("editor").hidden=true;$("jobs").hidden=true});
 var ADMIN_HASH="7e9653bd0c0413b5b8a0923f9b8931f8fe2f2636041115e796cda25cfdeee9cb",unlocked=false;
 try{unlocked=sessionStorage.getItem("cs-admin")==="1"}catch(e){}
-function openEditor(){fillEditor();$("login").hidden=true;$("editor").hidden=false;$("editor").scrollIntoView({behavior:"smooth",block:"start"})}
+function openEditor(){fillEditor();$("login").hidden=true;$("editor").hidden=false;jobsOpen();$("editor").scrollIntoView({behavior:"smooth",block:"start"})}
 $("editBtn").addEventListener("click",function(){if(unlocked){openEditor();return}$("editor").hidden=true;$("login").hidden=false;$("pwErr").textContent="";$("pw").value="";$("pw").focus()});
 $("loginClose").addEventListener("click",function(){$("login").hidden=true});
 $("loginForm").addEventListener("submit",function(e){e.preventDefault();
@@ -380,6 +406,74 @@ $("saveBtn").addEventListener("click",function(){
     }
   })();
 });
+
+/* job reports (owner only) */
+var job=null,jobs={},jobsSub=false;
+function blankJob(){return{id:"",name:"",date:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}),fee:model.upfront,payees:{},writers:Array(model.writers).fill("")}}
+function jobCalc(j){var up=Math.max(0,+j.fee||0),off=0;model.roles.forEach(function(r){if(r.top)off+=up*r.upfront/100});var net=up-off,w=Math.max(1,(j.writers||[]).length);
+  return{up:up,net:net,off:off,w:w,rows:model.roles.map(function(r,i){return{r:r,i:i,u:(r.top?up:net)*r.upfront/100}})}}
+function readJob(){job.name=$("jb-name").value.trim();job.date=$("jb-date").value.trim();job.fee=+$("jb-fee").value||0;
+  document.querySelectorAll("[data-payee]").forEach(function(el){job.payees[el.dataset.payee]=el.value});
+  job.writers=Array.from(document.querySelectorAll("[data-writer]")).map(function(el){return el.value})}
+function drawJob(){
+  $("jb-name").value=job.name;$("jb-date").value=job.date;if(document.activeElement!==$("jb-fee"))$("jb-fee").value=job.fee;
+  var d=jobCalc(job),h="";
+  d.rows.forEach(function(x){var r=x.r,share=pct(r.upfront).replace(".0%","%")+(r.top?" of license fee":" of profit share");
+    h+='<div class="payee"><div class="ph"><span><span class="dot" style="background:'+col(x.i)+';display:inline-block;margin-right:8px"></span>'+esc(label(r))+'</span><span>'+share+' · '+usd(x.u)+'</span></div>';
+    if(r.split){(job.writers.length?job.writers:[""]).forEach(function(n,k){h+='<div class="wr-row"><input type="text" data-writer="'+k+'" value="'+esc(n)+'" placeholder="Contributor '+(k+1)+' name" aria-label="Contributor '+(k+1)+' name"><span style="font:500 12px var(--f-mono);color:var(--muted);white-space:nowrap">'+usd(x.u/Math.max(1,job.writers.length))+'</span><button type="button" class="ghost" data-wdel="'+k+'" aria-label="Remove contributor">✕</button></div>'});
+      h+='<div><button type="button" id="jbAddW">+ Add contributor</button></div>'}
+    else h+='<input type="text" data-payee="'+esc(r.id)+'" value="'+esc(job.payees[r.id]||"")+'" placeholder="'+esc(r.name)+' name" aria-label="'+esc(r.name)+' name">';
+    h+='</div>'});
+  $("jb-payees").innerHTML=h;
+  $("jbRoleBtns").innerHTML=model.roles.map(function(r){return'<button type="button" data-rep="'+esc(r.id)+'">'+esc(r.id==="pm"?"PM":label(r).charAt(0)+label(r).slice(1).toLowerCase())+' report</button>'}).join("");
+  $("jbDel").hidden=!job.id;
+}
+$("jb-payees").addEventListener("click",function(e){
+  if(e.target.id==="jbAddW"){readJob();job.writers.push("");drawJob();var ins=document.querySelectorAll("[data-writer]");ins[ins.length-1].focus();return}
+  var b=e.target.closest("[data-wdel]");if(b){readJob();job.writers.splice(+b.dataset.wdel,1);if(!job.writers.length)job.writers=[""];drawJob()}});
+$("jb-fee").addEventListener("input",function(){readJob();drawJob()});
+function reportLines(roleId){
+  readJob();var d=jobCalc(job),pp=function(v){return (Math.round(v*100)/100)+"%"},L=[];
+  L.push((model.title||"Cinema Sessions").toUpperCase()+" · "+(roleId?label(model.roles.filter(function(r){return r.id===roleId})[0])+" REPORT":"JOB REPORT"));
+  L.push("Job: "+(job.name||"Untitled job"),"Date: "+(job.date||""),"License fee (per license): "+usd(d.up),"");
+  d.rows.forEach(function(x){var r=x.r;if(roleId&&r.id!==roleId)return;
+    if(r.top){L.push(r.name.toUpperCase()+": "+pp(r.upfront)+" of license fee = "+usd(x.u));if(job.payees[r.id])L.push("  Paid to: "+job.payees[r.id])}
+    else{L.push(r.name.toUpperCase()+": "+pp(r.upfront)+" of profit share ("+usd(d.net)+") = "+usd(x.u));
+      if(r.split)job.writers.forEach(function(n,k){L.push("  "+(n||"Contributor "+(k+1))+": "+usd(x.u/d.w)+" (1/"+d.w+")")});
+      else if(job.payees[r.id])L.push("  Paid to: "+job.payees[r.id])}
+    L.push("")});
+  if(!roleId)L.push("Profit share after "+model.roles.filter(function(r){return r.top}).map(function(r){return r.name}).join(" and ")+" fee: "+usd(d.net),"");
+  L.push("Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.");
+  return L.join("\n")+"\n";
+}
+function saveText(text,name){var blob=new Blob([text],{type:"text/plain"});
+  (async function(){var dl=null;try{if(window.claude&&claude.use)dl=await claude.use("downloads")}catch(e){}
+    if(dl){try{await dl.save({filename:name,data:blob});toast("Report downloaded")}catch(e){}return}
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast("Report downloaded")})()}
+function slug(t){return (t||"job").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"job"}
+$("jbAll").addEventListener("click",function(){saveText(reportLines(null),slug(job.name)+"-report.txt")});
+$("jbRoleBtns").addEventListener("click",function(e){var b=e.target.closest("[data-rep]");if(!b)return;var r=model.roles.filter(function(x){return x.id===b.dataset.rep})[0];saveText(reportLines(r.id),slug(job.name)+"-"+slug(r.short||r.name)+"-report.txt")});
+function fillSaved(){var sel=$("jb-saved"),cur=job&&job.id||"";var list=Object.keys(jobs).map(function(k){return jobs[k]}).sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0)});
+  sel.innerHTML='<option value="">New job</option>'+list.map(function(j){return'<option value="'+esc(j.id)+'">'+esc((j.name||"Untitled job")+(j.date?" · "+j.date:""))+'</option>'}).join("");sel.value=cur}
+$("jb-saved").addEventListener("change",function(){var id=this.value;job=id&&jobs[id]?JSON.parse(JSON.stringify(jobs[id])):blankJob();if(!job.writers||!job.writers.length)job.writers=[""];job.payees=job.payees||{};$("jbErr").textContent="";drawJob()});
+async function jobsOpen(){
+  if(!job){job=blankJob()}
+  drawJob();fillSaved();$("jobs").hidden=false;
+  if(jobsSub)return;
+  try{if(!db&&window.claude&&claude.use)db=await claude.use("db");if(!db)return;
+    jobsSub=true;db.collection("jobs").onSnapshot(function(q){jobs={};(q.docs||[]).forEach(function(doc){var v=doc.data();v.id=doc.id;jobs[doc.id]=v});fillSaved()},function(){jobsSub=false})}catch(e){}
+}
+$("jbSave").addEventListener("click",async function(){
+  readJob();$("jbErr").textContent="";
+  try{if(!db&&window.claude&&claude.use)db=await claude.use("db");
+    if(!db){$("jbErr").textContent="Saving jobs needs the page opened on claude.ai, signed in as the owner.";return}
+    if(!job.id)job.id="j"+Date.now().toString(36);
+    var clean={id:job.id,name:job.name,date:job.date,fee:+job.fee||0,payees:job.payees,writers:job.writers.map(function(n){return String(n).slice(0,120)}),updatedAt:Date.now()};
+    await db.doc("jobs/"+job.id).set(clean);jobs[job.id]=clean;fillSaved();drawJob();toast("Job saved")}
+  catch(e){$("jbErr").textContent="Couldn't save the job ("+((e&&(e.code||e.name))||"error")+")."}
+});
+$("jbDel").addEventListener("click",async function(){if(!job.id||!db)return;var b=$("jbDel");if(b.dataset.arm!=="1"){b.dataset.arm="1";b.textContent="Click again to delete";setTimeout(function(){b.dataset.arm="";b.textContent="Delete job"},4000);return}b.dataset.arm="";b.textContent="Delete job";try{await db.doc("jobs/"+job.id).delete();delete jobs[job.id];job=blankJob();drawJob();fillSaved();toast("Job deleted")}catch(e){$("jbErr").textContent="Couldn't delete the job."}});
+$("jbClose").addEventListener("click",function(){$("jobs").hidden=true});
 
 applyModel(DEFAULT,true);
 (async function(){
