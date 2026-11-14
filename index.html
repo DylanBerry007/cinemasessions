@@ -117,6 +117,8 @@ td .bs{color:var(--muted);font-size:12px}
 .split{display:grid;gap:12px}
 .flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center}
 .how{display:grid;gap:10px}.how ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:1fr;gap:6px;counter-reset:s}.how li{background:var(--soft);border-radius:12px;padding:10px 14px;display:flex;flex-wrap:wrap;column-gap:10px;row-gap:2px;align-items:baseline;counter-increment:s}.how li b{font-weight:600;font-size:14px}.how li b::before{content:counter(s)". ";color:var(--blue)}.how li span{font-size:13px;color:var(--muted);line-height:1.45}
+.pre{display:flex;flex-wrap:wrap;gap:4px 18px;font:500 12px var(--f-mono);color:var(--muted)}
+.tile.hero{padding:22px}.tile.hero .v{font-size:clamp(34px,5vw,46px)}
 .op{font-family:var(--f-disp);font-size:26px;color:var(--muted);text-align:center}
 .tile.net{background:var(--blue-soft)}
 .tile.net .v{color:var(--blue)}
@@ -180,7 +182,13 @@ td .bs{color:var(--muted);font-size:12px}
     <ol id="how"></ol>
   </section>
 
+  <section class="pie-wrap" aria-label="Profit share chart">
+      <span class="lab" id="pieLab">Profit share</span>
+      <div class="cl"><svg id="pie" viewBox="0 0 120 120" role="img" aria-label="Profit share pie chart"></svg><div class="leg" id="pieLeg"></div></div>
+  </section>
+
   <section class="calc" aria-label="Profit share">
+    <span class="lab">Calculator</span>
     <div class="inputs">
       <div class="f"><label for="upIn">Upfront license fee ($)</label><input id="upIn" type="number" min="0" step="500"></div>
       <div class="f"><label for="wrIn">Songwriters on the cue</label><div class="step"><button type="button" id="wrMinus" aria-label="Fewer writers">−</button><input id="wrIn" type="number" min="1" max="8" step="1" inputmode="numeric"><button type="button" id="wrPlus" aria-label="More writers">+</button></div></div>
@@ -189,10 +197,6 @@ td .bs{color:var(--muted);font-size:12px}
     <div class="bub-wrap">
       <span class="lab" id="bubLab"></span>
       <div class="bubs" id="bubs"></div>
-    </div>
-    <div class="pie-wrap">
-      <span class="lab" id="pieLab">Where the gross goes</span>
-      <div class="cl"><svg id="pie" viewBox="0 0 120 120" role="img" aria-label="Profit share pie chart"></svg><div class="leg" id="pieLeg"></div></div>
     </div>
     <details class="more">
       <summary>Show full breakdown</summary>
@@ -247,14 +251,14 @@ function donut(id,slices,label){
   $(id).innerHTML=s;
 }
 function pie(d){
-  var tot=d.up||1,a0=-Math.PI/2,svg="",items=d.rows.map(function(x){return{n:x.r.name,c:col(x.i),v:x.u/tot*100,a:x.u}}).filter(function(x){return x.v>0});
+  var a0=-Math.PI/2,svg="",items=d.rows.filter(function(x){return!x.r.top}).map(function(x){return{n:x.r.name,c:col(x.i),v:x.r.upfront,a:x.u}}).filter(function(x){return x.v>0});
   if(items.length===1)svg='<circle cx="60" cy="60" r="56" fill="'+items[0].c+'"/>';
   else items.forEach(function(x){var a1=a0+x.v/100*2*Math.PI,lg=(a1-a0)>Math.PI?1:0;
     svg+='<path d="M60 60L'+(60+56*Math.cos(a0)).toFixed(2)+' '+(60+56*Math.sin(a0)).toFixed(2)+'A56 56 0 '+lg+' 1 '+(60+56*Math.cos(a1)).toFixed(2)+' '+(60+56*Math.sin(a1)).toFixed(2)+'Z" fill="'+x.c+'" stroke="var(--bg)" stroke-width="1.5"/>';
-    var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+34*Math.cos(m)).toFixed(1)+'" y="'+(60+34*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="11" font-weight="600" style="fill:#fff">'+Math.round(x.v)+'%</text>';a0=a1});
+    var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+32*Math.cos(m)).toFixed(1)+'" y="'+(60+32*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="600" style="fill:#fff">'+Math.round(x.v)+'%</text>';a0=a1});
   if(!items.length)svg='<circle cx="60" cy="60" r="56" fill="var(--soft)"/>';
-  $("pie").innerHTML=svg;$("pieLab").textContent="Where the "+usd0(d.up)+" gross goes";
-  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+(Math.round(x.v*100)/100)+'% of gross<small>'+usd0(x.a)+'</small></span></div>'}).join("");
+  $("pie").innerHTML=svg;$("pieLab").textContent="Profit share of "+usd0(d.net);
+  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+(Math.round(x.v*100)/100)+'%<small>'+usd0(x.a)+'</small></span></div>'}).join("");
 }
 function legend(id,slices){
   $(id).innerHTML=slices.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+pct(x.v)+'<small>'+usd(x.a)+'</small></span></div>'}).join("");
@@ -268,10 +272,9 @@ function render(){
   var gross=d.up;
   function tile(x,sub){return'<div class="tile"><span class="k"><span class="dot" style="background:'+col(x.i)+'"></span>'+esc(label(x.r))+'</span><span class="v">'+usd0(x.u)+'</span><span class="s">'+sub+'</span></div>'}
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top});
-  var tiles='<div class="flow"><div class="tile gross"><span class="k">Gross</span><span class="v">'+usd0(gross)+'</span><span class="s">Upfront license fee</span></div>';
-  tops.forEach(function(x){tiles+='<span class="op" aria-hidden="true">−</span>'+tile(x,pct(x.r.upfront)+' off the top')});
-  tiles+='<span class="op" aria-hidden="true">=</span><div class="tile net"><span class="k">Net</span><span class="v">'+usd0(d.net)+'</span><span class="s">100% to split</span></div></div>';
-  tiles+='<span class="lab">Net split</span><div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront)+' of net')});tiles+='</div>';
+  var pre='<div class="pre"><span>License fee '+usd0(gross)+'</span>';tops.forEach(function(x){pre+='<span>Less '+esc(label(x.r))+' agent fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
+  var tiles=pre+'<div class="tile net hero"><span class="k">Profit share</span><span class="v">'+usd0(d.net)+'</span><span class="s">After agent fees, split below</span></div>';
+  tiles+='<div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront).replace('.0%','%')+' of profit share')});tiles+='</div>';
   $("tiles").innerHTML=tiles;pie(d);
   $("how").innerHTML=explain(d).map(function(x){return"<li><b>"+esc(x.h)+"</b><span>"+esc(x.t)+"</span></li>"}).join("");
   var pool=d.rows.filter(function(x){return x.r.split})[0];
@@ -299,10 +302,8 @@ var tt;function toast(m){$("toast").textContent=m;$("toast").classList.add("on")
 function explain(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"};
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top}),out=[];
-  out.push({h:"Start with the gross",t:"The full upfront license fee: "+usd0(d.up)+"."});
-  tops.forEach(function(x){out.push({h:x.r.name+" comes off the top",t:pp(x.r.upfront)+" of gross ("+usd0(x.u)+") is paid first, before anyone else."})});
-  out.push({h:"What's left is the net",t:usd0(d.up)+" minus "+usd0(d.off)+" leaves "+usd0(d.net)+". The net is 100% of what gets split."});
-  nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of net",t:usd0(x.u)+(x.r.split?", split equally among "+d.w+" writer"+(d.w===1?"":"s")+" ("+usd0(x.u/d.w)+" each)."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):".")})});
+  out.push({h:"Agent fees come off the top",t:usd0(d.up)+" license fee, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+label(x.r)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share."});
+  nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:usd0(x.u)+(x.r.split?", split equally among "+d.w+" writer"+(d.w===1?"":"s")+" ("+usd0(x.u/d.w)+" each)."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):".")})});
   return out;
 }
 $("copyBtn").addEventListener("click",function(){
