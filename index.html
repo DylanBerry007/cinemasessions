@@ -330,7 +330,7 @@ function explain(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"};
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top}),out=[];
   out.push({h:"Project Management fee comes off the top",t:"The "+tops.map(function(x){return (x.r.short||x.r.name)+" takes "+pp(x.r.upfront)}).join(" and ")+" of each license fee first. What's left is the profit share."});
-  nets.forEach(function(x){out.push({h:x.r.split&&x.r.pro>0?x.r.name+" gets "+pp(x.r.pro)+" of Writers, Publishing residuals ("+pp(x.r.upfront)+" of the total profit share)":x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:x.r.split?"Split equally among the contributing writers.":""})});
+  nets.forEach(function(x){out.push({h:x.r.split&&x.r.pro>0?x.r.name+" gets "+pp(x.r.pro)+" of Writers, Publishing residuals ("+pp(x.r.upfront)+" of the total profit share)":x.r.id==="studio"?(x.r.short||"Studio")+" gets 100% of Masters ("+pp(x.r.upfront)+" of net profit share)":x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:x.r.split?"Split equally among the contributing writers.":""})});
   return out;
 }
 $("copyBtn").addEventListener("click",function(){
