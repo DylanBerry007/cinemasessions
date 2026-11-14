@@ -42,6 +42,9 @@ button.ghost{border-color:transparent;color:var(--muted);padding-inline:10px}
 .fb td{padding:14px 12px;border-bottom:1px solid var(--line);vertical-align:top;line-height:1.45}
 .fb td.st{font-weight:600;white-space:nowrap}.fb td.sh2{font-family:var(--f-disp);font-size:20px;color:var(--blue);white-space:nowrap}.fb td.who{font-weight:600}.fb td.ds{color:var(--muted);font-size:13px}
 @media (max-width:700px){.fb thead{display:none}.fb table,.fb tbody,.fb tr,.fb td{display:block}.fb tr{background:var(--soft);border-radius:12px;padding:12px 14px;margin-bottom:8px}.fb td{border:0;padding:2px 0}.fb td.sh2{font-size:22px}}
+.calc .inputs label{font-size:17px;font-weight:700;color:var(--ink);letter-spacing:0}
+.calc .inputs input{font-size:18px;font-weight:600}
+.pre{font:600 15px var(--f-body)!important;color:var(--ink)!important}
 h2.sh,.calc h2.sh{font-family:var(--f-disp);font-weight:400;font-size:clamp(22px,3.2vw,28px);line-height:1.15;text-transform:uppercase;letter-spacing:.01em;color:var(--ink);margin:0 0 4px;padding-left:12px;border-left:5px solid var(--blue)}
 .lab{font-family:var(--f-mono);font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
@@ -226,7 +229,7 @@ td .bs{color:var(--muted);font-size:12px}
   <section class="calc" aria-label="Profit share">
     <h2 class="sh">Example profit share model</h2>
     <div class="inputs">
-      <div class="f"><label for="upIn">License fee, PER LICENSE ($)</label><input id="upIn" type="number" min="0" step="500"></div>
+      <div class="f"><label for="upIn">Average License fee, PER LICENSE ($)</label><input id="upIn" type="number" min="0" step="500"></div>
       <div class="f"><label for="wrIn">Songwriters on the cue</label><div class="step"><button type="button" id="wrMinus" aria-label="Fewer writers">−</button><input id="wrIn" type="number" min="1" max="8" step="1" inputmode="numeric"><button type="button" id="wrPlus" aria-label="More writers">+</button></div></div>
     </div>
     <div class="split" id="tiles"></div>
@@ -310,7 +313,7 @@ function render(){
   var gross=d.up;
   function tile(x,sub){return'<div class="tile"><span class="k"><span class="dot" style="background:'+col(x.i)+'"></span>'+esc(label(x.r))+'</span><span class="v">'+usd0(x.u)+'</span><span class="s">'+sub+'</span></div>'}
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top});
-  var pre='<div class="pre"><span>License fee '+usd0(gross)+' per license</span>';tops.forEach(function(x){pre+='<span>Less '+esc(x.r.short||x.r.name)+' fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
+  var pre='<div class="pre"><span>Average license fee '+usd0(gross)+' per license</span>';tops.forEach(function(x){pre+='<span>Less '+esc(x.r.short||x.r.name)+' fee ('+pct(x.r.upfront).replace('.0%','%')+') −'+usd0(x.u)+'</span>'});pre+='</div>';
   var tiles=pre+'<div class="tile net hero"><span class="k">Profit share per license</span><span class="v">'+usd0(d.net)+'</span><span class="s">After Project Management fee, split below</span></div>';
   tiles+='<div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront).replace('.0%','%')+' of profit share')});tiles+='</div>';
   $("tiles").innerHTML=tiles;pie(d);
