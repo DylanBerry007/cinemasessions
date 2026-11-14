@@ -189,7 +189,7 @@ td .bs{color:var(--muted);font-size:12px}
   </section>
 
   <section class="calc" aria-label="Profit share">
-    <span class="lab">Calculator</span>
+    <span class="lab">Example profit share model</span>
     <div class="inputs">
       <div class="f"><label for="upIn">License fee, PER LICENSE ($)</label><input id="upIn" type="number" min="0" step="500"></div>
       <div class="f"><label for="wrIn">Songwriters on the cue</label><div class="step"><button type="button" id="wrMinus" aria-label="Fewer writers">−</button><input id="wrIn" type="number" min="1" max="8" step="1" inputmode="numeric"><button type="button" id="wrPlus" aria-label="More writers">+</button></div></div>
@@ -258,8 +258,8 @@ function pie(d){
     svg+='<path d="M60 60L'+(60+56*Math.cos(a0)).toFixed(2)+' '+(60+56*Math.sin(a0)).toFixed(2)+'A56 56 0 '+lg+' 1 '+(60+56*Math.cos(a1)).toFixed(2)+' '+(60+56*Math.sin(a1)).toFixed(2)+'Z" fill="'+x.c+'" stroke="var(--bg)" stroke-width="1.5"/>';
     var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+32*Math.cos(m)).toFixed(1)+'" y="'+(60+32*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="12" font-weight="600" style="fill:#fff">'+Math.round(x.v)+'%</text>';a0=a1});
   if(!items.length)svg='<circle cx="60" cy="60" r="56" fill="var(--soft)"/>';
-  $("pie").innerHTML=svg;$("pieLab").textContent="Profit share per license: "+usd0(d.net);
-  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+(Math.round(x.v*100)/100)+'%<small>'+usd0(x.a)+'</small></span></div>'}).join("");
+  $("pie").innerHTML=svg;$("pieLab").textContent="Profit share per license";
+  $("pieLeg").innerHTML=items.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+(Math.round(x.v*100)/100)+'%</span></div>'}).join("");
 }
 function legend(id,slices){
   $(id).innerHTML=slices.map(function(x){return'<div class="li"><span class="l"><span class="dot" style="background:'+x.c+'"></span><span>'+esc(x.n)+'</span></span><span class="r">'+pct(x.v)+'<small>'+usd(x.a)+'</small></span></div>'}).join("");
@@ -277,7 +277,7 @@ function render(){
   var tiles=pre+'<div class="tile net hero"><span class="k">Profit share per license</span><span class="v">'+usd0(d.net)+'</span><span class="s">After Project Management fee, split below</span></div>';
   tiles+='<div class="tiles">';nets.forEach(function(x){tiles+=tile(x,pct(x.r.upfront).replace('.0%','%')+' of profit share')});tiles+='</div>';
   $("tiles").innerHTML=tiles;pie(d);
-  $("how").innerHTML=explain(d).map(function(x){return"<li><b>"+esc(x.h)+"</b><span>"+esc(x.t)+"</span></li>"}).join("");
+  $("how").innerHTML=explain(d).map(function(x){return"<li><b>"+esc(x.h)+"</b>"+(x.t?"<span>"+esc(x.t)+"</span>":"")+"</li>"}).join("");
   var pool=d.rows.filter(function(x){return x.r.split})[0];
   if(pool){var each=(pool.u+pool.p)/w,b="";for(var k=1;k<=w;k++)b+='<div class="bub"><small>Writer '+k+'</small><b>'+usd(each)+'</b><span>1/'+w+'</span></div>';
     $("bubLab").textContent=label(pool.r)+" split "+w+(w===1?" way":" ways");$("bubs").innerHTML=b;$("bubLab").parentNode.hidden=false}
@@ -303,13 +303,13 @@ var tt;function toast(m){$("toast").textContent=m;$("toast").classList.add("on")
 function explain(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"};
   var tops=d.rows.filter(function(x){return x.r.top}),nets=d.rows.filter(function(x){return!x.r.top}),out=[];
-  out.push({h:"Project Management fee comes off the top",t:usd0(d.up)+" per license, less "+tops.map(function(x){return "the "+pp(x.r.upfront)+" "+(x.r.short||x.r.name)+" fee"}).join(" and ")+", leaves "+usd0(d.net)+" to share per license."});
-  nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:usd0(x.u)+(x.r.split?", split equally among "+d.w+" writer"+(d.w===1?"":"s")+" ("+usd0(x.u/d.w)+" each)."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):".")})});
+  out.push({h:"Project Management fee comes off the top",t:"The "+tops.map(function(x){return (x.r.short||x.r.name)+" takes "+pp(x.r.upfront)}).join(" and ")+" of each license fee first. What's left is the profit share."});
+  nets.forEach(function(x){out.push({h:x.r.name+" gets "+pp(x.r.upfront)+" of the profit share",t:x.r.split?"Split equally among the contributing writers."+(x.r.pro>0?" Writers also keep "+pp(x.r.pro)+" of their PRO royalties.":""):""})});
   return out;
 }
 $("copyBtn").addEventListener("click",function(){
   var d=calc(),L=[model.title+": how the profit share works (per license)",""];
-  explain(d).forEach(function(x,i){L.push((i+1)+". "+x.h,"   "+x.t,"")});
+  explain(d).forEach(function(x,i){L.push((i+1)+". "+x.h);if(x.t)L.push("   "+x.t);L.push("")});
   L.push("Financial model does not showcase residual income.");var text=L.join("\n").replace(/\n+$/,"")+"\n",name="cinema-sessions-profit-share.txt";
   var blob=new Blob([text],{type:"text/plain"});
   var anchor=function(){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast("Summary downloaded")};
