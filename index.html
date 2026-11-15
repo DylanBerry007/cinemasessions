@@ -154,6 +154,8 @@ th{font-size:12px!important}
 td .bs{font-size:13.5px!important}
 .li .r{white-space:nowrap}
 @media (max-width:560px){.cl{flex-direction:column;align-items:stretch}.cl svg{align-self:center}.leg{width:100%}}
+body.pdf .wrap{padding-block:8px 8px;gap:18px}body.pdf #pie{width:130px;height:130px}body.pdf .pie-wrap{gap:6px}body.pdf .calc{gap:12px}
+.pdfbrk{display:none}body.pdf .pdfbrk{display:block}
 </style>
 
 <div class="wrap">
@@ -242,7 +244,7 @@ td .bs{font-size:13.5px!important}
 
   <section class="pie-wrap" aria-label="Profit share chart">
       <h2 class="sh" id="pieLab">Profit share</h2>
-      <div class="cl"><svg id="pie" viewBox="0 0 120 120" role="img" aria-label="Profit share pie chart"></svg><div class="leg" id="pieLeg"></div></div>
+      <div class="cl"><svg id="pie" width="170" height="170" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Profit share pie chart"></svg><div class="leg" id="pieLeg"></div></div>
   </section>
 
   <section class="calc" aria-label="Profit share">
@@ -286,6 +288,7 @@ var usd0=function(v){return new Intl.NumberFormat("en-US",{style:"currency",curr
 var usd=function(v){return new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"}).format(v||0)};
 var pct=function(v){v=+v||0;return (Math.round(v*100)/100).toFixed(Number.isInteger(Math.round(v*100)/100)?1:2)+"%"};
 var col=function(i){return "var("+COLORS[i%COLORS.length]+")"};
+var cssv=function(c){var m=/^var\((--[\w-]+)\)$/.exec(c);if(!m)return c;var v=getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim();return v||c};
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function sane(m){
   var d=JSON.parse(JSON.stringify(DEFAULT));
@@ -312,9 +315,9 @@ function pie(d){
   var pp=function(v){return (Math.round(v*100)/100)+"%"},topPct=0;d.rows.forEach(function(x){if(x.r.top)topPct+=x.r.upfront});
   var a0=-Math.PI/2,svg="",items=d.rows.map(function(x){var g=x.r.top?x.r.upfront:(100-topPct)*x.r.upfront/100;return{n:x.r.name,c:col(x.i),v:g,lab:x.r.top?pp(x.r.upfront):pp(x.r.upfront)+" net",leg:x.r.top?pp(x.r.upfront)+" off the top":pp(x.r.upfront)+" of net"}}).filter(function(x){return x.v>0});
   items.sort(function(a,b){return (b.leg.indexOf("top")>-1)-(a.leg.indexOf("top")>-1)});
-  if(items.length===1)svg='<circle cx="60" cy="60" r="56" fill="'+items[0].c+'"/>';
+  if(items.length===1)svg='<circle cx="60" cy="60" r="56" fill="'+cssv(items[0].c)+'"/>';
   else items.forEach(function(x){var a1=a0+x.v/100*2*Math.PI,lg=(a1-a0)>Math.PI?1:0;
-    svg+='<path d="M60 60L'+(60+56*Math.cos(a0)).toFixed(2)+' '+(60+56*Math.sin(a0)).toFixed(2)+'A56 56 0 '+lg+' 1 '+(60+56*Math.cos(a1)).toFixed(2)+' '+(60+56*Math.sin(a1)).toFixed(2)+'Z" fill="'+x.c+'" stroke="var(--bg)" stroke-width="1.5"/>';
+    var fillc=cssv(x.c);svg+='<path d="M60 60L'+(60+56*Math.cos(a0)).toFixed(2)+' '+(60+56*Math.sin(a0)).toFixed(2)+'A56 56 0 '+lg+' 1 '+(60+56*Math.cos(a1)).toFixed(2)+' '+(60+56*Math.sin(a1)).toFixed(2)+'Z" fill="'+fillc+'" stroke="'+cssv("var(--bg)")+'" stroke-width="1.5"/>';
     var m=(a0+a1)/2;if(x.v>=8)svg+='<text x="'+(60+33*Math.cos(m)).toFixed(1)+'" y="'+(60+33*Math.sin(m)+4).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="600" style="fill:#fff">'+esc(x.lab)+'</text>';a0=a1});
   if(!items.length)svg='<circle cx="60" cy="60" r="56" fill="var(--soft)"/>';
   $("pie").innerHTML=svg;$("pieLab").textContent="Profit share per license";
@@ -369,17 +372,27 @@ function explain(d){
     out.push({st:"Step "+(n++)+": "+(w?"Writers' Share":m?"Masters' Share":x.r.name+" Share"),sh:pp(x.r.upfront)+" of Net",who:w?"Contributing Talent (Writers)":m?"The Studio (SQUEEK E-CLEAN - Exclusive sole signatory, admin rights)":x.r.name,ds:w?"Split equally among all music and lyric creators as the publishing/writer's share.":m?"Retained by the studio or rights holder for the master recording.":(x.r.basis||"")})});
   return out;
 }
-$("copyBtn").addEventListener("click",function(){
-  var d=calc(),L=[model.title,"The Financial Breakdown (per license)",""];
-  explain(d).forEach(function(x,i){var st=x.st.replace(/^Step \d+: /,"");L.push((i+1)+". "+st+": "+x.sh+(x.who==="Remaining Balance"?" (split 50/50 below)":" to "+x.who.replace(/ - Exclusive[^)]*/,"")+(/Writers/.test(x.who)?", split equally":"")))});L.push("");
-  L.push("Financial model does not showcase residual income in the form of writers' and publishers' residuals, which will be paid directly by your P.R.O. to talent in perpetuity.");var text=L.join("\n").replace(/\n+$/,"")+"\n",name="cinema-sessions-profit-share.txt";
-  var blob=new Blob([text],{type:"text/plain"});
-  var anchor=function(){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);toast("Summary downloaded")};
-  (async function(){
+var h2pLoad=null;
+function loadH2P(){if(window.html2pdf)return Promise.resolve();if(h2pLoad)return h2pLoad;
+  h2pLoad=new Promise(function(ok,no){var sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";sc.onload=ok;sc.onerror=function(){h2pLoad=null;no(new Error("load"))};document.head.appendChild(sc)});return h2pLoad}
+$("copyBtn").addEventListener("click",async function(){
+  var btn=$("copyBtn"),root=document.documentElement,prevTheme=root.getAttribute("data-theme"),marked=[];
+  btn.disabled=true;btn.textContent="Preparing PDF…";
+  try{
+    await loadH2P();
+    root.setAttribute("data-theme","light");document.body.classList.add("pdf");render();
+    var hide=["header .acts","#login","#editor","#jobs","details.more","#toast"];
+    hide.forEach(function(q){document.querySelectorAll(q).forEach(function(el){el.setAttribute("data-html2canvas-ignore","true");marked.push(el)})});
+    var name=(model.title||"Cinema Sessions").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-profit-share.pdf";
+    var el=document.querySelector(".wrap");await new Promise(function(r){setTimeout(r,60)});
+    var canvas=await html2pdf().set({html2canvas:{scale:2,useCORS:true,backgroundColor:"#ffffff"}}).from(el).toCanvas().get("canvas");
+    var pw=215.9,mg=10,ph=(pw-2*mg)*canvas.height/canvas.width+2*mg+1;
+    var blob=await html2pdf().set({margin:mg,filename:name,image:{type:"jpeg",quality:0.95},jsPDF:{unit:"mm",format:[pw,Math.max(ph,100)],orientation:"portrait"},pagebreak:{mode:[]}}).from(canvas,"canvas").outputPdf("blob");
     var dl=null;try{if(window.claude&&claude.use)dl=await claude.use("downloads")}catch(e){}
-    if(dl){try{await dl.save({filename:name,data:blob});toast("Summary downloaded")}catch(e){}return}
-    anchor();
-  })();
+    if(dl){try{await dl.save({filename:name,data:blob});toast("PDF downloaded")}catch(e){}}
+    else{var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);toast("PDF downloaded")}
+  }catch(e){toast("Couldn't make the PDF. Try again.")}
+  finally{document.body.classList.remove("pdf");render();marked.forEach(function(el){el.removeAttribute("data-html2canvas-ignore")});if(prevTheme===null)root.removeAttribute("data-theme");else root.setAttribute("data-theme",prevTheme);btn.disabled=false;btn.textContent="Download summary"}
 });
 
 /* owner editor */
